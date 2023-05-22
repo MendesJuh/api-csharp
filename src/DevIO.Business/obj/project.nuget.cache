@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "xOp8mjAB5THbQzJW8SCAJAafGo6WMlCU+KuH2iOlMjnDgiu6PdYHhSNLGS4knoX9smtTpp0Qx9E5lKYk3CFx/g==",
+  "success": true,
+  "projectFilePath": "C:\\Projetos Visual Studio\\Juliana\\MinhaApiCompleta\\API\\src\\DevIO.Business\\DevIO.Business.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\c121300\\.nuget\\packages\\fluentvalidation\\8.6.2\\fluentvalidation.8.6.2.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512",
+    "C:\\Users\\c121300\\.nuget\\packages\\system.componentmodel.annotations\\4.4.1\\system.componentmodel.annotations.4.4.1.nupkg.sha512"
+  ],
+  "logs": []
+}
