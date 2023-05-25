@@ -19,6 +19,16 @@ namespace DevIO.Data.Repository
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        public Task<object> ObterProdutoFornecedor()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<object> ObterProdutosFornecedor()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<IEnumerable<Produto>> ObterProdutosFornecedores()
         {
             return await Db.Produtos.AsNoTracking().Include(f => f.Fornecedor)
