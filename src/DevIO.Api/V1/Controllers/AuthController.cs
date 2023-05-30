@@ -1,8 +1,10 @@
-﻿using DevIO.Api.Extensions;
+﻿using DevIO.Api.Controllers;
+using DevIO.Api.Extensions;
 using DevIO.Api.ViewModels;
 using DevIO.Business.Intefaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -13,24 +15,27 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DevIO.Api.Controllers
+namespace DevIO.Api.V1.Controllers
 {
-    [Route("api")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}")]
     public class AuthController : MainController
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppSettings _appSettings;
+        private readonly ILogger _logger;
 
         public AuthController(INotificador notificador,
                               SignInManager<IdentityUser> signInManager,
-                              UserManager<IdentityUser> userManager, 
-                              IOptions<AppSettings> appSettings, 
-                              IUser user) : base(notificador, user)
+                              UserManager<IdentityUser> userManager,
+                              IOptions<AppSettings> appSettings,
+                              IUser user, ILogger<AuthController> logger) : base(notificador, user)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appSettings = appSettings.Value;
+            _logger = logger;
         }
         [HttpPost("nova-conta")]
         public async Task<ActionResult> Registrar(RegisterUserViewModel registerUser)
@@ -50,7 +55,7 @@ namespace DevIO.Api.Controllers
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return CustomResponse(await GerarJwt(user.Email));
             }
-            foreach(var error in result.Errors)
+            foreach (var error in result.Errors)
             {
                 NotificarErro(error.Description);
             }
@@ -62,13 +67,14 @@ namespace DevIO.Api.Controllers
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
-            var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, isPersistent:false, lockoutOnFailure:true);
+            var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, isPersistent: false, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
+                _logger.LogInformation(message: "Usuário" + loginUser.Email + "logado com sucesso");
                 return CustomResponse(await GerarJwt(loginUser.Email));
             }
-            if(result.IsLockedOut)
+            if (result.IsLockedOut)
             {
                 NotificarErro(mensagem: "Usuário temporariamente bloqueado por tentativas inválidas");
                 return CustomResponse(loginUser);
@@ -79,15 +85,15 @@ namespace DevIO.Api.Controllers
         }
 
         private async Task<LoginResponseViewModel> GerarJwt(string email)
-            {
+        {
             var user = await _userManager.FindByEmailAsync(email);
             var claims = await _userManager.GetClaimsAsync(user);
             var userRoles = await _userManager.GetRolesAsync(user);
 
             claims.Add(new Claim(type: JwtRegisteredClaimNames.Sub, value: user.Id));
             claims.Add(new Claim(type: JwtRegisteredClaimNames.Email, value: user.Email));
-            claims.Add(new Claim(type: JwtRegisteredClaimNames.Jti, value:Guid.NewGuid().ToString()));
-            claims.Add(new Claim(type: JwtRegisteredClaimNames.Nbf, value:ToUnixEpochDate(DateTime.UtcNow).ToString()));
+            claims.Add(new Claim(type: JwtRegisteredClaimNames.Jti, value: Guid.NewGuid().ToString()));
+            claims.Add(new Claim(type: JwtRegisteredClaimNames.Nbf, value: ToUnixEpochDate(DateTime.UtcNow).ToString()));
             claims.Add(new Claim(type: JwtRegisteredClaimNames.Iat, value: ToUnixEpochDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer64));
             foreach (var userRole in userRoles)
             {

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DevIO.Api.Controllers;
 using DevIO.Api.Extensions;
 using DevIO.Api.ViewModels;
 using DevIO.Business.Intefaces;
@@ -11,10 +12,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace DevIO.Api.Controllers
+namespace DevIO.Api.V1.Controllers
 {
     [Authorize]
-    [Route("api/produtos")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/produtos")]
     public class ProdutosController : MainController
     {
         private readonly IProdutoRepository _produtoRepository;
@@ -24,8 +26,8 @@ namespace DevIO.Api.Controllers
 
         public ProdutosController(INotificador notificador,
                                   IProdutoService produtoService,
-                                  IProdutoRepository produtoRepository, 
-                                  IMapper mapper, 
+                                  IProdutoRepository produtoRepository,
+                                  IMapper mapper,
                                   IUser user) : base(notificador, user)
         {
             _produtoService = produtoService;
@@ -57,7 +59,7 @@ namespace DevIO.Api.Controllers
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
             var imagemNome = Guid.NewGuid() + "_" + produtoViewModel.Imagem;
-            if(!UploadArquivo(produtoViewModel.ImagemUpload, imagemNome))
+            if (!UploadArquivo(produtoViewModel.ImagemUpload, imagemNome))
             {
                 return CustomResponse(produtoViewModel);
             }
@@ -74,7 +76,7 @@ namespace DevIO.Api.Controllers
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
             var imgPrefixo = Guid.NewGuid() + "_";
-            if (! await UploadArquivoAlternativo(produtoViewModel.ImagemUpload, imgPrefixo))
+            if (!await UploadArquivoAlternativo(produtoViewModel.ImagemUpload, imgPrefixo))
             {
                 return CustomResponse(ModelState);
             }
@@ -95,7 +97,7 @@ namespace DevIO.Api.Controllers
             produtoViewModel.Imagem = produtoAtualizacao.Imagem;
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
-            if(produtoViewModel.ImagemUpload != null)
+            if (produtoViewModel.ImagemUpload != null)
             {
                 var imagemNome = Guid.NewGuid() + "_" + produtoViewModel.Imagem;
                 if (!UploadArquivo(produtoViewModel.ImagemUpload, imagemNome))
@@ -132,9 +134,9 @@ namespace DevIO.Api.Controllers
             return CustomResponse(produto);
         }
 
-        private  bool UploadArquivo(string arquivo, string imgNome)
+        private bool UploadArquivo(string arquivo, string imgNome)
         {
-            
+
 
             if (string.IsNullOrEmpty(arquivo))
             {
@@ -152,7 +154,7 @@ namespace DevIO.Api.Controllers
             }
 
             System.IO.File.WriteAllBytes(filePath, imageDataByteArray);
-  
+
             return true;
         }
 
@@ -160,7 +162,7 @@ namespace DevIO.Api.Controllers
         {
 
 
-            if (arquivo == null || arquivo.Length ==0)
+            if (arquivo == null || arquivo.Length == 0)
             {
                 NotificarErro(mensagem: "Forneça uma imagem para esse produto!");
                 return false;
@@ -187,7 +189,7 @@ namespace DevIO.Api.Controllers
         {
 
             return _mapper.Map<ProdutoViewModel>(await _produtoRepository.ObterProdutoFornecedor());
-            
+
 
         }
 
